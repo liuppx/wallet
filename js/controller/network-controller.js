@@ -287,7 +287,7 @@ export class NetworkController {
   }
 
   getNetworkSelectors() {
-    return Array.from(document.querySelectorAll('.network-selector'));
+    return Array.from(document.querySelectorAll('.network-selector[data-network-selector="true"]'));
   }
 
   toggleNetworkMenu(selector) {
