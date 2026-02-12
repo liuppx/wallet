@@ -151,6 +151,7 @@ export class PopupController {
     const originEl = document.getElementById('unlockReasonOrigin');
     const methodEl = document.getElementById('unlockReasonMethod');
     const timeEl = document.getElementById('unlockReasonTime');
+    const methodBadgeEl = document.getElementById('unlockReasonMethodBadge');
 
     if (!info || (!info.origin && !info.method && !info.timestamp)) {
       container.classList.add('hidden');
@@ -158,11 +159,59 @@ export class PopupController {
     }
 
     if (originEl) originEl.textContent = info.origin || '-';
-    if (methodEl) methodEl.textContent = info.method || '-';
+    const formatted = this.formatUnlockMethod(info.method);
+    if (methodEl) {
+      methodEl.textContent = formatted.detail || formatted.label || info.method || '-';
+      if (info.method) {
+        methodEl.title = info.method;
+      }
+    }
+    if (methodBadgeEl) {
+      methodBadgeEl.textContent = formatted.label || '-';
+    }
     if (timeEl) {
       timeEl.textContent = info.timestamp ? formatLocaleDateTime(info.timestamp) : '-';
     }
     container.classList.remove('hidden');
+  }
+
+  formatUnlockMethod(method) {
+    const raw = String(method || '').trim();
+    if (!raw) {
+      return { label: '请求', detail: '-' };
+    }
+    const map = {
+      yeying_ucan_sign: { label: 'UCAN', detail: 'UCAN 签名' },
+      yeying_ucan_session: { label: 'UCAN', detail: 'UCAN 会话' },
+      eth_requestAccounts: { label: '连接', detail: '连接钱包' },
+      eth_sendTransaction: { label: '交易', detail: '发送交易' },
+      eth_signTransaction: { label: '交易', detail: '签名交易' },
+      personal_sign: { label: '签名', detail: '消息签名' },
+      eth_sign: { label: '签名', detail: '消息签名' },
+      eth_signTypedData: { label: '签名', detail: '结构化签名' },
+      eth_signTypedData_v4: { label: '签名', detail: '结构化签名' },
+      wallet_requestPermissions: { label: '授权', detail: '权限请求' },
+      wallet_addEthereumChain: { label: '网络', detail: '添加网络' },
+      wallet_switchEthereumChain: { label: '网络', detail: '切换网络' },
+      wallet_watchAsset: { label: '资产', detail: '添加资产' }
+    };
+    if (map[raw]) {
+      return map[raw];
+    }
+    const lower = raw.toLowerCase();
+    if (lower.includes('siwe')) {
+      return { label: 'SIWE', detail: 'SIWE 登录' };
+    }
+    if (lower.includes('ucan')) {
+      return { label: 'UCAN', detail: 'UCAN 请求' };
+    }
+    if (lower.startsWith('eth_')) {
+      return { label: '以太坊', detail: '链上请求' };
+    }
+    if (lower.startsWith('wallet_')) {
+      return { label: '钱包', detail: '钱包请求' };
+    }
+    return { label: '请求', detail: raw };
   }
 
   bindEvents() {
